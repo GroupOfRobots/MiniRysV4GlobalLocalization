@@ -1,6 +1,5 @@
 #include "FlyCapture2.h"
 #include <iostream>
-// temporary compilation: g++ -std=c++11 camera_test.cpp -I/usr/include/flycapture -lflycapture -o mycppfile
 
 using namespace FlyCapture2;
 
