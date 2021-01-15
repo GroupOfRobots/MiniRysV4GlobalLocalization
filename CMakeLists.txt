@@ -48,20 +48,20 @@ target_include_directories(camera_test
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>)
 
-# add_executable(aruco_dummy src/aruco_dummy.cpp)
-# target_link_libraries(aruco_dummy ${OpenCV_LIBS} aruco)
-# ament_target_dependencies(aruco_dummy ${AMENT_DEPENDENCIES})
+add_executable(detection_test src/detection_test.cpp)
+target_link_libraries(detection_test flycapture ${OpenCV_LIBS} aruco)
+ament_target_dependencies(detection_test ${AMENT_DEPENDENCIES})
 
-# target_include_directories(aruco_dummy
-#   PUBLIC
-#     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-#     $<INSTALL_INTERFACE:include>)
+target_include_directories(detection_test
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>)
 
-add_executable(live_detection_test src/live_detection_test.cpp)
-target_link_libraries(live_detection_test flycapture ${OpenCV_LIBS} aruco)
-ament_target_dependencies(live_detection_test ${AMENT_DEPENDENCIES})
+add_executable(detection_consistency_test src/detection_consistency_test.cpp)
+target_link_libraries(detection_consistency_test flycapture ${OpenCV_LIBS} aruco)
+ament_target_dependencies(detection_consistency_test ${AMENT_DEPENDENCIES})
 
-target_include_directories(live_detection_test
+target_include_directories(detection_consistency_test
   PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>)
@@ -69,8 +69,8 @@ target_include_directories(live_detection_test
 
 install(TARGETS
   camera_test
-#  aruco_dummy
-  live_detection_test
+  detection_test
+  detection_consistency_test
 	DESTINATION lib/${PROJECT_NAME}
 )
 

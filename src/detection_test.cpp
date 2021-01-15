@@ -1,7 +1,10 @@
 #include <iostream>
+#include <math.h>
 #include <opencv2/core.hpp>
 #include <opencv2/highgui.hpp>
-#include "markerdetector.h"
+#include <opencv2/imgproc.hpp>
+#include "aruco.h"
+// #include "markerdetector.h"
 #include "FlyCapture2.h"
 using namespace  std;
 
@@ -65,14 +68,39 @@ int main(int argc, char const *argv[])
 	unsigned int rowBytes = (double)rgbImage.GetReceivedDataSize()/(double)rgbImage.GetRows();       
 	cv::Mat InImage = cv::Mat(rgbImage.GetRows(), rgbImage.GetCols(), CV_8UC3, rgbImage.GetData(),rowBytes);
 
-	// detect markers on image
+	// set detection parameters (dictionary, camera parameters, markersize, ...) and detect markers on image
 	aruco::MarkerDetector MDetector;
-	vector<aruco::Marker> Markers = MDetector.detect(InImage);
+	MDetector.setDictionary("ARUCO_MIP_36h12", 0.f);
+	aruco::CameraParameters CamParam;
+	if (argc > 1) {
+		CamParam.readFromXMLFile(argv[1]);
+	}
+	// float MarkerSize = 0.0385;
+	float MarkerSize = 0.163;
+	vector<aruco::Marker> Markers = MDetector.detect(InImage, CamParam, MarkerSize);
 
 	// draw markers on image
 	for(auto m:Markers){
+		cout << m << endl;
 		m.draw(InImage, cv::Scalar(0, 0, 255), 2);
 	}
+
+	// draw axises and cubes
+    if (CamParam.isValid() && MarkerSize != -1) {
+    	for (auto m:Markers) {
+    		cout<< "Transform matrix "<<m.id<<endl;
+    		cout<<m.getTransformMatrix()<<endl;
+            aruco::CvDrawingUtils::draw3dAxis(InImage, m, CamParam);
+            aruco::CvDrawingUtils::draw3dCube(InImage, m, CamParam);
+    	}
+    }
+
+
+    float distance = 0;
+    for (unsigned int i = 0; i < Markers.size() - 1; i++) {
+	    distance = sqrt(pow(Markers[i].Tvec.at<float>(0,0) - Markers[i+1].Tvec.at<float>(0,0), 2) + pow(Markers[i].Tvec.at<float>(1,0) - Markers[i+1].Tvec.at<float>(1,0), 2) + pow(Markers[i].Tvec.at<float>(2,0) - Markers[i+1].Tvec.at<float>(2,0), 2));
+	    cout << "Distance between markers " << Markers[i].id << " and " << Markers[i+1].id << ": " << distance << endl;
+    }
 
 	// show image
 	cv::imshow("image_with_markers_detected",InImage);
