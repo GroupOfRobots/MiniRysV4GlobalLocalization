@@ -66,11 +66,21 @@ target_include_directories(detection_consistency_test
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>)
 
+add_executable(fix_distortion_test src/fix_distortion_test.cpp)
+target_link_libraries(fix_distortion_test flycapture ${OpenCV_LIBS} aruco)
+ament_target_dependencies(fix_distortion_test ${AMENT_DEPENDENCIES})
+
+target_include_directories(fix_distortion_test
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>)
+
 
 install(TARGETS
   camera_test
   detection_test
   detection_consistency_test
+  fix_distortion_test
 	DESTINATION lib/${PROJECT_NAME}
 )
 
