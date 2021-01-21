@@ -75,8 +75,8 @@ int main(int argc, char const *argv[])
 	if (argc > 1) {
 		CamParam.readFromXMLFile(argv[1]);
 	}
-	float MarkerSize = 0.0385;
-	// float MarkerSize = 0.163;
+	// float MarkerSize = 0.0385;
+	float MarkerSize = 0.163;
 	vector<aruco::Marker> Markers = MDetector.detect(InImage, CamParam, MarkerSize);
 
 	// draw markers on image

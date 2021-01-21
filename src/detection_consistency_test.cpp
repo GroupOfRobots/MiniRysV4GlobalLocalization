@@ -91,11 +91,13 @@ int main(int argc, char const *argv[])
 			m.draw(InImage, cv::Scalar(0, 0, 255), 2);
 		}
 
-	    float distance = 0;
-	    for (unsigned int i = 0; i < Markers.size() - 1; i++) {
-		    distance = sqrt(pow(Markers[i].Tvec.at<float>(0,0) - Markers[i+1].Tvec.at<float>(0,0), 2) + pow(Markers[i].Tvec.at<float>(1,0) - Markers[i+1].Tvec.at<float>(1,0), 2) + pow(Markers[i].Tvec.at<float>(2,0) - Markers[i+1].Tvec.at<float>(2,0), 2));
-		    cout << "Distance between markers " << Markers[i].id << " and " << Markers[i+1].id << ": " << distance << endl;
-	    }
+    float distance = 0;
+    for (unsigned int i = 0; i < Markers.size() - 1; i++) {
+    	for (unsigned int j = i + 1; j < Markers.size(); j++) {
+		    distance = sqrt(pow(Markers[i].Tvec.at<float>(0,0) - Markers[j].Tvec.at<float>(0,0), 2) + pow(Markers[i].Tvec.at<float>(1,0) - Markers[j].Tvec.at<float>(1,0), 2) + pow(Markers[i].Tvec.at<float>(2,0) - Markers[j].Tvec.at<float>(2,0), 2));
+		    cout << "Distance between markers " << Markers[i].id << " and " << Markers[j].id << ": " << distance << endl;
+		}
+    }
 
 		// show image
 		cv::imshow("image_with_markers_detected",InImage);

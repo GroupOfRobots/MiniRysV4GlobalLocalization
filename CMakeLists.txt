@@ -20,6 +20,7 @@ set(CMAKE_BUILD_TYPE Release)
 # find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(rosidl_default_generators REQUIRED)
 set(CMAKE_PREFIX_PATH "/home/dangield/opencv3/install")
 find_package(OpenCV REQUIRED)
 set(CMAKE_PREFIX_PATH "/home/dangield/aruco/install")
@@ -33,6 +34,12 @@ install(
         DIRECTORY include/
         DESTINATION include
 )
+
+rosidl_generate_interfaces(${PROJECT_NAME}
+  "srv/GetMinirysGlobalLocalization.srv"
+)
+
+ament_export_dependencies(rosidl_default_runtime)
 
 # setting ament dependencies
 set(AMENT_DEPENDENCIES
@@ -75,12 +82,23 @@ target_include_directories(fix_distortion_test
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>)
 
+add_executable(global_localization src/global_localization.cpp)
+target_link_libraries(global_localization flycapture ${OpenCV_LIBS} aruco)
+ament_target_dependencies(global_localization ${AMENT_DEPENDENCIES})
+rosidl_target_interfaces(global_localization
+  ${PROJECT_NAME} "rosidl_typesupport_cpp")
+
+target_include_directories(global_localization
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>)
 
 install(TARGETS
   camera_test
   detection_test
   detection_consistency_test
   fix_distortion_test
+  global_localization
 	DESTINATION lib/${PROJECT_NAME}
 )
 

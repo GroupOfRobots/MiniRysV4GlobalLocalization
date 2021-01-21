@@ -1,0 +1,9 @@
+minirys_global_localization:
+  ros__parameters:
+    main_env_marker_id: 0
+    main_env_marker_size: 0.163 # in meters
+    backup_env_marker_id: 1
+    backup_env_marker_size: 0.163 # in meters
+    robot_marker_id: 153
+    robot_marker_size: 0.0385
+    camera_parameters_file: 'pointgrey_camera_calibration.yml' # relevant to this file location

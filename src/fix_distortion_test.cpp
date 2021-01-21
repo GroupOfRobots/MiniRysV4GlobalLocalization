@@ -75,8 +75,9 @@ int main(int argc, char const *argv[])
 		CamParam.readFromXMLFile(argv[1]);
 	}
 
+	cv::Mat new_CameraMatrix = cv::getOptimalNewCameraMatrix(CamParam.CameraMatrix, CamParam.Distorsion.colRange(0, 4), InImage.size(), 1);
     // cv::fisheye::undistortImage(InImage, OutImage, CamParam.CameraMatrix, CamParam.Distorsion.colRange(0, 4));
-    cv::undistort(InImage, OutImage, CamParam.CameraMatrix, CamParam.Distorsion.colRange(0, 4), CamParam.CameraMatrix);
+    cv::undistort(InImage, OutImage, CamParam.CameraMatrix, CamParam.Distorsion.colRange(0, 4), new_CameraMatrix);
 	// show image
 	cv::imshow("distorted_image",InImage);
 	cv::imshow("undistorted_image",OutImage);
