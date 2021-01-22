@@ -103,8 +103,9 @@ class GlobalLocalizationNode : public rclcpp::Node{
 		FlyCapture2::Image rawImage, rgbImage;
 
 		cv::Mat inImage;
-		cv::Mat backupToMainTransformation;
+		cv::Mat backupToMainTransformation, robotToEnvTransformation;
 		cv::Mat point0, robotPosition;
+		cv::Vec3f robotEulerRotations;
 
 		aruco::Marker mainEnvMarker, backupEnvMarker, robotMarker, temporaryMarker;
 		aruco::MarkerDetector markerDetector;
@@ -117,23 +118,16 @@ class GlobalLocalizationNode : public rclcpp::Node{
 
 			switch (status) {
 				case LocalizationStatus::OK:
-					robotPosition = mainEnvMarker.getTransformMatrix().inv()*robotMarker.getTransformMatrix()*point0;
-					std::cout << point0 << std::endl;
-					std::cout << mainEnvMarker << std::endl;
-					std::cout << mainEnvMarker.getTransformMatrix() << std::endl;
-					std::cout << robotMarker << std::endl;
-					std::cout << robotMarker.getTransformMatrix() << std::endl;
-					std::cout << robotPosition << std::endl;
-					// robotPosition = (
-					// 	mainEnvMarker.getTransformMatrix().inv()*robotMarker.getTransformMatrix()*point0 +
-					// 	backupToMainTransformation*backupEnvMarker.getTransformMatrix().inv()*robotMarker.getTransformMatrix()*point0
-					// ) * 0.5;
+					robotToEnvTransformation = (
+						mainEnvMarker.getTransformMatrix().inv()*robotMarker.getTransformMatrix() +
+						backupToMainTransformation*backupEnvMarker.getTransformMatrix().inv()*robotMarker.getTransformMatrix()
+					) * 0.5;
 					break;
 				case LocalizationStatus::MAIN_MARKER_NOT_FOUND:
-					robotPosition = backupToMainTransformation*backupEnvMarker.getTransformMatrix().inv()*robotMarker.getTransformMatrix()*point0;
+					robotToEnvTransformation = backupToMainTransformation*backupEnvMarker.getTransformMatrix().inv()*robotMarker.getTransformMatrix();
 					break;
 				case LocalizationStatus::BACKUP_MARKER_NOT_FOUND:
-					robotPosition = mainEnvMarker.getTransformMatrix().inv()*robotMarker.getTransformMatrix()*point0;
+					robotToEnvTransformation = mainEnvMarker.getTransformMatrix().inv()*robotMarker.getTransformMatrix();
 					break;
 				case LocalizationStatus::NO_PHOTO_TAKEN:
 				case LocalizationStatus::ROBOT_MARKER_NOT_FOUND:
@@ -145,10 +139,12 @@ class GlobalLocalizationNode : public rclcpp::Node{
 					return;
 			}
 
+			robotEulerRotations = rotationMatrixToEulerAngles(robotToEnvTransformation);
+			robotPosition = robotToEnvTransformation*point0;
 
 			response->x = robotPosition.at<float>(0, 0);
 			response->y = robotPosition.at<float>(1, 0);
-			response->alpha = 0;
+			response->alpha = robotEulerRotations.at<float>(2);
 		}
 
 		int take_photo(){
@@ -187,7 +183,6 @@ class GlobalLocalizationNode : public rclcpp::Node{
 				RCLCPP_ERROR(this->get_logger(), "Main marker was not detected in environment.");
 				returnValue += LocalizationStatus::MAIN_MARKER_NOT_FOUND;
     		} else mainEnvMarker = temporaryMarker;
-    		std::cout << mainEnvMarker << std::endl;
 
 			// detect backup marker location
 			Markers = markerDetector.detect(inImage, cameraParameters, backupEnvMarker.ssize);
@@ -202,7 +197,6 @@ class GlobalLocalizationNode : public rclcpp::Node{
 				RCLCPP_ERROR(this->get_logger(), "Backup marker was not detected in environment.");
 				returnValue += LocalizationStatus::BACKUP_MARKER_NOT_FOUND;
 			} else backupEnvMarker = temporaryMarker;
-    		std::cout << backupEnvMarker << std::endl;
 
 			if (returnValue == 0) backupToMainTransformation = mainEnvMarker.getTransformMatrix().inv() * backupEnvMarker.getTransformMatrix();
 
@@ -231,10 +225,32 @@ class GlobalLocalizationNode : public rclcpp::Node{
 				RCLCPP_ERROR(this->get_logger(), "Robot marker was not detected in environment.");
 				return LocalizationStatus::ROBOT_MARKER_NOT_FOUND;
 			} else robotMarker = temporaryMarker;
-    		std::cout << robotMarker << std::endl;
 
 			return LocalizationStatus::OK;
 		}
+
+		cv::Vec3f rotationMatrixToEulerAngles(cv::Mat &R)
+		{
+		    float sy = sqrt(R.at<float>(0,0) * R.at<float>(0,0) +  R.at<float>(1,0) * R.at<float>(1,0) );
+
+		    bool singular = sy < 1e-6; // If
+
+		    float x, y, z;
+		    if (!singular)
+		    {
+		        x = atan2(R.at<float>(2,1) , R.at<float>(2,2));
+		        z = atan2(R.at<float>(1,0), R.at<float>(0,0));
+		        y = atan2(-R.at<float>(2,0), sy);
+		    }
+		    else
+		    {
+		        x = atan2(-R.at<float>(1,2), R.at<float>(1,1));
+		        y = atan2(-R.at<float>(2,0), sy);
+		        z = 0;
+		    }
+		    return cv::Vec3f(x, y, z);  
+		}
+
 };
 
 int main(int argc, char const *argv[])
