@@ -12,7 +12,7 @@ if(NOT CMAKE_CXX_STANDARD)
 endif()
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-  add_compile_options(-Wall -Wextra -Wpedantic -pthread)
+  add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
 
 set(CMAKE_BUILD_TYPE Release)
@@ -20,7 +20,7 @@ set(CMAKE_BUILD_TYPE Release)
 # find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
-find_package(rosidl_default_generators REQUIRED)
+find_package(minirys_drivers REQUIRED)
 set(CMAKE_PREFIX_PATH "/home/dangield/opencv3/install")
 find_package(OpenCV REQUIRED)
 set(CMAKE_PREFIX_PATH "/home/dangield/aruco/install")
@@ -35,15 +35,10 @@ install(
         DESTINATION include
 )
 
-rosidl_generate_interfaces(${PROJECT_NAME}
-  "srv/GetMinirysGlobalLocalization.srv"
-)
-
-ament_export_dependencies(rosidl_default_runtime)
-
 # setting ament dependencies
 set(AMENT_DEPENDENCIES
 	rclcpp
+  minirys_drivers
 )
 
 add_executable(camera_test src/camera_test.cpp)
@@ -85,8 +80,6 @@ target_include_directories(fix_distortion_test
 add_executable(global_localization src/global_localization.cpp)
 target_link_libraries(global_localization flycapture ${OpenCV_LIBS} aruco)
 ament_target_dependencies(global_localization ${AMENT_DEPENDENCIES})
-rosidl_target_interfaces(global_localization
-  ${PROJECT_NAME} "rosidl_typesupport_cpp")
 
 target_include_directories(global_localization
   PUBLIC
