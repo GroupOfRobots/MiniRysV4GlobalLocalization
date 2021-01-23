@@ -135,7 +135,7 @@ class GlobalLocalizationNode : public rclcpp::Node{
 				default:
 					response->x = 999999;
 					response->y = 999999;
-					response->alpha = 999999;
+					response->theta = 999999;
 					return;
 			}
 
@@ -144,7 +144,7 @@ class GlobalLocalizationNode : public rclcpp::Node{
 
 			response->x = robotPosition.at<float>(0, 0);
 			response->y = robotPosition.at<float>(1, 0);
-			response->alpha = robotEulerRotations[2];
+			response->theta = robotEulerRotations[2];
 		}
 
 		int take_photo(){
