@@ -114,7 +114,11 @@ class GlobalLocalizationNode : public rclcpp::Node{
 		void get_robot_localization(
 					const std::shared_ptr<minirys_drivers::srv::GetMinirysGlobalLocalization::Request> request,
 					std::shared_ptr<minirys_drivers::srv::GetMinirysGlobalLocalization::Response> response) {
-			if (request.get()->reset) locate_env_markers();
+			RCLCPP_INFO(this->get_logger(), "Service called...");
+			if (request.get()->reset) {
+				locate_env_markers();
+				RCLCPP_INFO(this->get_logger(), "Reseting location of environment markers...");
+			}
 			
 			int status = locate_robot_marker();
 
