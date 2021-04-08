@@ -20,7 +20,7 @@ set(CMAKE_BUILD_TYPE Release)
 # find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
-find_package(minirys_drivers REQUIRED)
+find_package(minirys_interfaces REQUIRED)
 set(CMAKE_PREFIX_PATH "/home/dangield/opencv3/install")
 find_package(OpenCV REQUIRED)
 set(CMAKE_PREFIX_PATH "/home/dangield/aruco/install")
@@ -38,7 +38,7 @@ install(
 # setting ament dependencies
 set(AMENT_DEPENDENCIES
 	rclcpp
-  minirys_drivers
+  minirys_interfaces
 )
 
 add_executable(camera_test src/camera_test.cpp)

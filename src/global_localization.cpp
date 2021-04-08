@@ -1,5 +1,5 @@
 #include "rclcpp/rclcpp.hpp"
-#include "minirys_drivers/srv/get_minirys_global_localization.hpp"
+#include "minirys_interfaces/srv/get_minirys_global_localization.hpp"
 #include <memory>
 #include "aruco.h"
 #include "FlyCapture2.h"
@@ -77,7 +77,7 @@ class GlobalLocalizationNode : public rclcpp::Node{
 			locate_robot_marker();
 
 			// initialize service
-			service = this->create_service<minirys_drivers::srv::GetMinirysGlobalLocalization>(
+			service = this->create_service<minirys_interfaces::srv::GetMinirysGlobalLocalization>(
 				"get_minirys_global_localization",
 				std::bind(&GlobalLocalizationNode::get_robot_localization,
 						this,
@@ -94,7 +94,7 @@ class GlobalLocalizationNode : public rclcpp::Node{
 		}
 
 	private:
-		rclcpp::Service<minirys_drivers::srv::GetMinirysGlobalLocalization>::SharedPtr service;
+		rclcpp::Service<minirys_interfaces::srv::GetMinirysGlobalLocalization>::SharedPtr service;
 		std::string camera_params_file;
 
 		FlyCapture2::Camera camera;
@@ -112,8 +112,8 @@ class GlobalLocalizationNode : public rclcpp::Node{
 		aruco::CameraParameters cameraParameters;
 
 		void get_robot_localization(
-					const std::shared_ptr<minirys_drivers::srv::GetMinirysGlobalLocalization::Request> request,
-					std::shared_ptr<minirys_drivers::srv::GetMinirysGlobalLocalization::Response> response) {
+					const std::shared_ptr<minirys_interfaces::srv::GetMinirysGlobalLocalization::Request> request,
+					std::shared_ptr<minirys_interfaces::srv::GetMinirysGlobalLocalization::Response> response) {
 			RCLCPP_INFO(this->get_logger(), "Service called...");
 			if (request.get()->reset) {
 				locate_env_markers();

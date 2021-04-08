@@ -73,7 +73,7 @@ int main(int argc, char const *argv[])
 		{
 			printf("%s\n", error.GetDescription());
 			std::cout << "capture error" << std::endl;
-			return false;
+			continue;
 		}
 
 		// convert image to rgb from greyscale
